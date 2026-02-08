@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=matrix_mult_MPI
+#SBATCH --job-name=monte_carlo_MPI
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=bryon.catlin@ufl.edu
 #SBATCH --account=eel6763
@@ -10,6 +10,6 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=1000mb
 #SBATCH -t 00:01:00
-#SBATCH -o partA/mat_mult_output
-#SBATCH -e partA/mat_mult_err
-srun --mpi=$HPC_PMIX ./partA/mat_mult
+#SBATCH -o partB/monte_carlo_output
+#SBATCH -e partB/monte_carlo_err
+srun --mpi=$HPC_PMIX ./partB/monte_carlo -10 10 100000

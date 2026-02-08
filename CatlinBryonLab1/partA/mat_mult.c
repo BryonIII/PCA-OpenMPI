@@ -1,4 +1,4 @@
-/*mat_mult.c */
+/*Bryon Catlin mat_mult.c */
  
 #include "mpi.h"
 #include <stdio.h>

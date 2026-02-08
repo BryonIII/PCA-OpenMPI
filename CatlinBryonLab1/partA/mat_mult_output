@@ -169,6 +169,6 @@ Result Matrix:
 4400	3626	2852	2078	1304	530	-244	-1018	-1792	-2566	
 ******************************************************
 
-total time: 0.00022941 sec
-total worker time: 0.00000297 sec
-max worker time: 0.00000054 sec
+total time: 0.00022408 sec
+total worker time: 0.00000519 sec
+max worker time: 0.00000163 sec
