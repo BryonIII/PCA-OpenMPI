@@ -1,0 +1,19 @@
+Worker 7's result is: 2.22652032
+Worker 7's start_time is: 0.00000000
+Worker 6's result is: 2.28252240
+Worker 6's start_time is: 0.00000000
+Worker 1's result is: 2.24978319
+Worker 1's start_time is: 0.00000000
+Worker 3's result is: 2.26993593
+Worker 3's start_time is: 0.00000000
+Worker 5's result is: 2.08523295
+Worker 5's start_time is: 0.00000000
+Worker 2's result is: 2.32840075
+Worker 2's start_time is: 0.00000000
+Worker 0's result is: 2.30618671
+Worker 0's start_time is: 0.21973542
+The end time is: 0.22064759
+The result is 17.94983316
+Time spent: 0.00091217 seconds
+Worker 4's result is: 2.20125092
+Worker 4's start_time is: 0.00000000

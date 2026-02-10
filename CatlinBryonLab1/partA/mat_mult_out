@@ -169,6 +169,13 @@ Result Matrix:
 4400	3626	2852	2078	1304	530	-244	-1018	-1792	-2566	
 ******************************************************
 
-total time: 0.00022408 sec
-total worker time: 0.00000519 sec
-max worker time: 0.00000163 sec
+total time: 0.00019110 sec
+Worker 1's time is: 0.00000051
+Worker 2's time is: 0.00000056
+Worker 3's time is: 0.00000055
+Worker 4's time is: 0.00000048
+Worker 5's time is: 0.00000027
+Worker 6's time is: 0.00000030
+Worker 7's time is: 0.00000034
+total worker time: 0.00000301 sec
+max worker time: 0.00000056 sec

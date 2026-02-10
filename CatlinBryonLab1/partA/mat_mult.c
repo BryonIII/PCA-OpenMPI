@@ -136,9 +136,6 @@ numworkers = numtasks-1;
          MPI_Recv(&rows, 1, MPI_INT, source, mtype, MPI_COMM_WORLD, &status);
          MPI_Recv(&C[offset][0], rows*NCB, MPI_INT, source, mtype, 
                   MPI_COMM_WORLD, &status);
-	 MPI_Recv(&wcalcTime, 1, MPI_DOUBLE, source, mtype, MPI_COMM_WORLD, &status);
-	 sum_wcalcTime += wcalcTime;
-         max_wcalcTime = (wcalcTime>max_wcalcTime) ? wcalcTime : max_wcalcTime; 
 	 printf("Received results from task %d\n",source);
       }
 
@@ -160,8 +157,16 @@ numworkers = numtasks-1;
       printf("\n******************************************************\n");
       printf ("\n");
       printf("total time: %.8f sec\n", time_spent);
-      printf("total worker time: %.8f sec\nmax worker time: %.8f sec", sum_wcalcTime, max_wcalcTime);
-      printf ("\n");
+      
+      for (i=1; i<=numworkers; i++)
+      {
+         source = i;
+         MPI_Recv(&wcalcTime, 1, MPI_DOUBLE, source, mtype, MPI_COMM_WORLD, &status);
+         printf("Worker %d's time is: %.8f\n", i, wcalcTime);
+	 sum_wcalcTime += wcalcTime;
+         max_wcalcTime = (wcalcTime>max_wcalcTime) ? wcalcTime : max_wcalcTime;
+      }
+      printf("total worker time: %.8f sec\nmax worker time: %.8f sec\n", sum_wcalcTime, max_wcalcTime);
    }
 
 

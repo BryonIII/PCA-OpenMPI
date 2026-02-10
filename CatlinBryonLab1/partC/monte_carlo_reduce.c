@@ -46,43 +46,27 @@ void collect_results(double *result){
         MPI_Comm_rank(MPI_COMM_WORLD, &rank);
         MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Status status;
+
+	double total, start_time, end_time;
+
+	// receive and reduce all results into one sum
+	MPI_Reduce(result, &total, 1, MPI_DOUBLE, MPI_SUM, MASTER, MPI_COMM_WORLD);
+	if(rank == MASTER) end_time = MPI_Wtime(); // stop timer immediately after last receive
+	
+	// receive all worker times
+	MPI_Reduce(&g_worker_start_time, &start_time, 1, MPI_DOUBLE, MPI_MIN, MASTER, MPI_COMM_WORLD);
+
+	printf("Worker %d's result is: %.8f\n", rank, *result);
+	printf("Worker %d's start_time is: %.8f\n", rank, start_time);
 	/* ----------- master node ----------- */
-        if(rank==0){
-		double total = *result;
-		// receive and sum all results
-                for(int src = 1; src < size; src++){
-                        double tmp = 0.0;
-			MPI_Recv(&tmp, 1, MPI_DOUBLE,src, FROM_WORKER, MPI_COMM_WORLD, &status);
-			total+=tmp;
-                }
-		double end_time = MPI_Wtime(); // measure end time immediately after last result received
+        if(rank == MASTER){
 		*result = total;
 
-		// get time spent and final result
-		double start_time = g_worker_start_time;
-		printf("Master worker's time was: %.8f\nEnd time was: %.8f\n", g_worker_start_time, end_time);
-		for(int src = 1; src < size; src++){
-			double tmp;
-			MPI_Recv(&tmp, 1, MPI_DOUBLE,src, TIME_FROM_WORKER, MPI_COMM_WORLD, &status);
-			if(tmp<start_time) start_time=tmp;
-		}
-		
-		// print final results and time spend
+		// print final results and time spent
+		printf("The end time is: %.8f\n", end_time);
 		printf("The result is %.8f\n", *result);
 		printf("Time spent: %.8f seconds\n", end_time-start_time);
         }
-	/* ----------- worker nodes ----------- */
-	else{
-		// send result inside of timer
-		MPI_Send(result, 1, MPI_DOUBLE, MASTER, FROM_WORKER, MPI_COMM_WORLD);
-		
-		// send time taken outside of timer
-		MPI_Send(&g_worker_start_time, 1, MPI_DOUBLE, MASTER, TIME_FROM_WORKER, MPI_COMM_WORLD);
-		
-		// print result outside of timer for verification/partial credit
-		printf("Worker %d's start time was: %.8f\n", rank, g_worker_start_time);
-                printf("Worker %d's result was: %.8f\n", rank, *result);
-	}
 }
 
 double estimate_g(double lower_bound, double upper_bound, long long int N){
@@ -90,26 +74,20 @@ double estimate_g(double lower_bound, double upper_bound, long long int N){
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Status status;
-	long long localN;
+	long long localN, aveN, remN;
 	double partial, local_sum, u, x;
 	/* ----------- master node ----------- */
-	if(rank==0){
+	if(rank == MASTER){
         	local_sum = 0.0;
 		
-		long long aveN = N/size;
-		long long remN = N%size;
+		// split data
+		aveN = N/size;
+		remN = N%size;
+		localN = aveN + (rank < remN ? 1 : 0);
 
-		// split data and send to workers
-		for(int dest = 1; dest < size; dest++){
-			localN = (dest < remN) ? aveN+1 : aveN;
-			MPI_Send(&localN, 1, MPI_LONG_LONG, dest, FROM_MASTER, MPI_COMM_WORLD);
-		}
-
-		localN = (0 < remN) ? aveN+1 : aveN;
-		
 		g_worker_start_time = MPI_Wtime(); // start master worker timer
 
-		// perform monte_carlo calculation
+		// perform monte_carlo calculations
 		for(long long i = 0; i<localN; i++){
 		        u = (double)rand()/(double)RAND_MAX;
                		x = lower_bound + u * (upper_bound - lower_bound);
@@ -122,12 +100,15 @@ double estimate_g(double lower_bound, double upper_bound, long long int N){
 	}
 	/* ----------- worker nodes ----------- */
 	else{
-		// receive data
-		MPI_Recv(&localN, 1, MPI_LONG_LONG, MASTER, FROM_MASTER, MPI_COMM_WORLD, &status);
-                local_sum = 0.0;
+                // split data
+		aveN  = N / size;
+		remN  = N % size;
+		localN = aveN + (rank < remN ? 1 : 0);
+		
+		local_sum = 0.0;
 		g_worker_start_time = MPI_Wtime(); // start worker timer
 		
-		// perform monte_carlo calculation
+		// perform monte_carlo calculations
 		for(long long i = 0; i<localN; i++){
                         u = (double)rand()/(double)RAND_MAX;
                         x = lower_bound + u * (upper_bound - lower_bound);

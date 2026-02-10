@@ -1,0 +1,11 @@
+Worker 3's result is: 4.21315035
+Worker 3's start_time is: 0.00000000
+Worker 2's result is: 4.39249795
+Worker 2's start_time is: 0.00000000
+Worker 1's result is: 4.47865399
+Worker 1's start_time is: 0.00000000
+Worker 0's result is: 4.48766423
+Worker 0's start_time is: 0.20696024
+The end time is: 0.20741351
+The result is 17.57196653
+Time spent: 0.00045327 seconds
