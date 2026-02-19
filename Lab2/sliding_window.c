@@ -1,3 +1,4 @@
+/*Bryon Catlin PCA-Lab2*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
@@ -60,6 +61,10 @@ int* initialize_data(int N){
 int* mask_operation(int *recv_buff, int N){
 	int* updated = (g_proc_rows > 0) ? (int*)malloc((size_t)g_proc_rows*N*sizeof(int)) : NULL;
 	
+	int rank, size;
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_rank(MPI_COMM_WORLD, &size);
+
 	if (g_proc_rows == 0) return updated; //return if 0
 
 	for(int row = 1; row<=g_proc_rows; row++){
@@ -85,7 +90,16 @@ int* mask_operation(int *recv_buff, int N){
 		}
 	
 	}
-
+	/* only print below for R4N15
+	printf("\n--- Rank %d updated rows (g_proc_rows=%d rows)--\n", rank, g_proc_rows);
+        for (int r = 0; r < g_proc_rows; r++) {
+        	printf("  ");
+                for (int c = 0; c < N; c++) {
+                       	printf("%3d  ", updated[r*N + c]);
+        	}
+        	printf("\n");
+        }
+	*/
 	return updated;
 
 }
@@ -120,17 +134,38 @@ int* distribute_data(int* A, int N){
 			displs[i] = (total_rows_sent > 0) ? (start_row*N) : 0;
 
 		}
+		/* only print below for R4N15 first run 
+		printf("\n--- Scatterv send_counts[0]-send_counts[%d], displs[0]-displs[%d] ---\n", size, size);
+                for (int i = 0; i < size; i++) {
+                        printf("i=%d: send_counts=%d  displs=%d\n", i, send_counts[i], displs[i]);
+                }
+		*/
 	}
 
 	int recv_count = g_recv_rows*N;
-	int *recv_buffer = (recv_count>0) ? (int*)malloc((size_t)recv_count * sizeof(int)) : NULL;
+	int *recv_buff = (recv_count>0) ? (int*)malloc((size_t)recv_count * sizeof(int)) : NULL;
 
 	if(rank == MASTER) g_time_taken = MPI_Wtime();
-	MPI_Scatterv(A, send_counts, displs, MPI_INT, recv_buffer, recv_count, MPI_INT, MASTER, MPI_COMM_WORLD);
+	MPI_Scatterv(A, send_counts, displs, MPI_INT, recv_buff, recv_count, MPI_INT, MASTER, MPI_COMM_WORLD);
+
+        /* only print below for R4N15 first run 
+	for (int r = 0; r < size; r++) {
+                if (rank == r) {
+                        printf("\n--- Rank %d received chunk (g_recv_rows=%d rows) ---\n", rank, g_recv_rows);
+                        for (int rr = 0; rr < g_recv_rows; rr++) {
+                                printf("  ");
+                                for (int cc = 0; cc < N; cc++) {
+                                        printf("%3d  ", recv_buff[rr*N + cc]);
+                                }
+                                printf("\n");
+                        }
+                }
+        }
+	*/
 
 	if(rank == MASTER) {free(send_counts); free(displs);}
 
-	return recv_buffer;
+	return recv_buff;
 }
 
 void collect_results(int *updated_buff, int N, int *Ap){
@@ -160,6 +195,12 @@ void collect_results(int *updated_buff, int N, int *Ap){
 			displs[i] = start_row*N;
 		
 		}
+		/* only print below for R4N15
+		printf("\n--- Gatherv send_counts[0]-send_counts[%d], displs[0]-displs[%d] ---\n", size, size);
+                for (int i = 0; i < size && i < 4; i++) {
+                        printf("i=%d: send_counts=%d  displs=%d\n", i, recv_counts[i], displs[i]);
+                }
+		*/
 	
 	}
 
